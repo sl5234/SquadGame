@@ -1,8 +1,6 @@
 # SquadGame
 Changbal hackathon
 
-# Dream Team Builder
-
 Dream Team Builder is a simple, interactive web application that helps users create their dream project team. Users can enter their project details, get AI-recommended candidates, review candidate information, hire members, and build their full team.
 
 ## Features
@@ -77,7 +75,6 @@ The application can be accessed using the following URL patterns:
 ## License
 
 This project is released under the MIT License.
->>>>>>> 044158a (Initial commit)
 
 # Getting Started with Create React App
 
