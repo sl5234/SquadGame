@@ -4,8 +4,10 @@ import TeamCreationPage from './components/TeamCreationPage';
 import CandidateRecommendationPage from './components/CandidateRecommendationPage';
 import MemberAddedPage from './components/MemberAddedPage';
 import TeamCompletePage from './components/TeamCompletePage';
+import Header from './components/Header';
+import { ThemeProvider } from './context/ThemeContext';
 import getRecommendedMembers from './services/aiService';
-import EnvTest from './EnvTest'; // Import the test component
+import './styles/theme.css'; // Import the theme styles
 
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -25,17 +27,6 @@ function App() {
   const [candidates, setCandidates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Log environment variables on app start
-  useEffect(() => {
-    console.log('App started - Environment Variable Check:');
-    console.log('REACT_APP_OPENAI_API_KEY exists:', !!process.env.REACT_APP_OPENAI_API_KEY);
-    
-    // If using webpack 5, this might explain why it's not working
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Running in development mode. If using webpack 5, ensure dotenv is properly configured.');
-    }
-  }, []);
-
   // Get AI-recommended candidates
   const getCandidateRecommendations = async () => {
     console.log('🔍 Getting candidate recommendations for:', teamData.project_name || 'project');
@@ -139,11 +130,14 @@ function App() {
   };
 
   return (
-    <div className="container">
-      {/* Environment Variable Test - Remove after debugging */}
-      <EnvTest />
-      {renderPage()}
-    </div>
+    <ThemeProvider>
+      <div className="app">
+        <Header />
+        <div className="container">
+          {renderPage()}
+        </div>
+      </div>
+    </ThemeProvider>
   );
 }
 

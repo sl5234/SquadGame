@@ -3,7 +3,7 @@
 const config = {
   // OpenAI API configuration
   openai: {
-    apiKey: "PLACEHOLDER",
+    apiKey: "foo",
     model: "gpt-4o", // or any other model you want to use
     temperature: 0.7
   }

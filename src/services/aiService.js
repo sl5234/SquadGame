@@ -10,9 +10,6 @@ import getMemberRecommendationPrompt from '../prompt/getMemberRecommendationProm
  */
 export const getRecommendedMembers = async (projectData, currentMembers = []) => {
   try {
-    // Show an alert when getting recommendations
-    alert("AI is analyzing your project to find the perfect team members!");
-    
     // Get system prompt from our prompt file
     const systemPrompt = getMemberRecommendationPrompt();
     

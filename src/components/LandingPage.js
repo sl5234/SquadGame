@@ -1,13 +1,15 @@
 import React from 'react';
+import logo from '../data/web_logo.png';
 
 const LandingPage = ({ onStart }) => {
   return (
     <div className="landing-page">
-      <h1>Dream Team Builder</h1>
-      <p>Create your perfect project team with our AI-powered recommendation system.</p>
-      <button onClick={onStart}>Start my dream team</button>
+      <div className="landing-logo-container">
+        <img src={logo} alt="squadgame Logo" className="landing-logo" />
+      </div>
+      <button onClick={onStart}>Build my squad</button>
     </div>
   );
 };
 
-export default LandingPage; 
+export default LandingPage;

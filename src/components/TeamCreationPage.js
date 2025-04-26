@@ -19,9 +19,6 @@ const TeamCreationPage = ({ onCreateTeam }) => {
       return;
     }
     
-    // Show alert when recommending first member
-    alert("Looking for the perfect first team member for your project!");
-    
     // Parse comma-separated values into arrays
     const requiredRolesArray = requiredRoles.split(',').map(role => role.trim()).filter(Boolean);
     const hardSkillsArray = hardSkills.split(',').map(skill => skill.trim()).filter(Boolean);
@@ -44,13 +41,13 @@ const TeamCreationPage = ({ onCreateTeam }) => {
 
   return (
     <div className="team-creation-page">
-      <h1>Create Your Dream Team</h1>
+      <h1>Create your squad</h1>
       
       {error && <div className="error-message">{error}</div>}
       
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="teamName">Team/Project Name*</label>
+          <label htmlFor="teamName">Squad Name*</label>
           <input
             type="text"
             id="teamName"
@@ -58,17 +55,6 @@ const TeamCreationPage = ({ onCreateTeam }) => {
             onChange={(e) => setTeamName(e.target.value)}
             placeholder="Enter your team or project name"
             required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="ideaName">Idea Name</label>
-          <input
-            type="text"
-            id="ideaName"
-            value={ideaName}
-            onChange={(e) => setIdeaName(e.target.value)}
-            placeholder="Enter your idea name (if different from team name)"
           />
         </div>
         

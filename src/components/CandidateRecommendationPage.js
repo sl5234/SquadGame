@@ -27,11 +27,16 @@ const ListDisplay = ({ items, title }) => {
   );
 };
 
-// Loading spinner component
+// Loading spinner component with space theme
 const LoadingSpinner = () => (
   <div className="loading-spinner">
-    <div className="spinner"></div>
-    <p>AI is analyzing your project to find the perfect team members...</p>
+    <div className="spinner-container">
+      <div className="planet"></div>
+      <div className="orbit">
+        <div className="satellite"></div>
+      </div>
+    </div>
+    <p className="loading-text">AI is analyzing your project to find the perfect team members...</p>
   </div>
 );
 

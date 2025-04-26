@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './styles/theme.css'; // Load theme variables first
+import './App.css';
+import './styles/Header.css'; // Load component-specific styles
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
