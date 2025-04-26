@@ -44,7 +44,7 @@ function App() {
     if (currentPage === 'candidateRecommendation') {
       getCandidateRecommendations();
     }
-  }, [currentPage]);
+  }, [currentPage, teamData]);
 
   const handleStartTeam = () => {
     setCurrentPage('teamCreation');

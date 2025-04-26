@@ -1,5 +1,6 @@
 import config from '../config';
 import candidatesData from '../data/candidates.json';
+import getMemberRecommendationPrompt from '../prompt/getMemberRecommendationPrompt';
 
 /**
  * Gets recommended team members based on project details and current team composition
@@ -18,17 +19,23 @@ export const getRecommendedMembers = async (projectData, currentMembers = []) =>
       return getMockRecommendations(projectData, currentMembers);
     }
 
+    // Get system prompt from our prompt file
+    const systemPrompt = getMemberRecommendationPrompt();
+    
+    // Get user prompt with project details and candidates data
+    const userPrompt = generatePrompt(projectData, currentMembers, candidatesData);
+
     const requestBody = {
       model: config.openai.model,
       temperature: config.openai.temperature,
       messages: [
         {
           role: "system",
-          content: "You are a specialized HR AI that helps recruit the perfect team members for a project. Generate creative, detailed, and realistic candidates with specific recruiting strategies based on the project requirements."
+          content: systemPrompt
         },
         {
           role: "user",
-          content: generatePrompt(projectData, currentMembers)
+          content: userPrompt
         }
       ]
     };
@@ -62,15 +69,32 @@ export const getRecommendedMembers = async (projectData, currentMembers = []) =>
 };
 
 /**
- * Generate the prompt for OpenAI based on project data and current team
+ * Generate the prompt for OpenAI based on project data, current team, and all available candidates
+ * @param {Object} projectData - The project details
+ * @param {Array} currentMembers - Current team members
+ * @param {Array} availableCandidates - All available candidates from candidates.json
+ * @returns {String} - The formatted prompt
  */
-const generatePrompt = (projectData, currentMembers) => {
+const generatePrompt = (projectData, currentMembers, availableCandidates) => {
+  // Create current team members description
   const memberDetails = currentMembers.length > 0 
-    ? `\nCurrent team members: ${currentMembers.map(m => m.name).join(', ')}` 
-    : '';
+    ? `\nCurrent team members:\n${currentMembers.map((m, i) => 
+        `Member ${i+1}: ${m.name}\n${m.recruitingStrategy ? `Background: ${m.recruitingStrategy}` : ''}`
+      ).join('\n\n')}` 
+    : '\nCurrent team members: None';
 
-  return `Generate 3 creative candidate profiles for a project team based on the following project details:
+  // Format available candidates for the prompt
+  const availableCandidatesList = availableCandidates
+    .filter(candidate => !currentMembers.some(member => member.name === candidate.name))
+    .map((candidate, index) => 
+      `Candidate ${index+1}: ${candidate.name}
+Background: ${candidate.recruitingStrategy}`
+    ).join('\n\n');
+
+  return `I need help recruiting team members for the following project:
   
+PROJECT DETAILS
+==============
 Project Name: ${projectData.project_name || projectData.teamName}
 ${projectData.idea_name ? `Idea: ${projectData.idea_name}` : ''}
 Description: ${projectData.description || projectData.projectDescription}
@@ -79,11 +103,22 @@ ${projectData.product_type ? `Product Type: ${projectData.product_type}` : ''}
 ${projectData.required_roles?.length > 0 ? `Required Roles: ${projectData.required_roles.join(', ')}` : ''}
 ${projectData.hard_skills_experience?.length > 0 ? `Hard Skills & Experience: ${projectData.hard_skills_experience.join(', ')}` : ''}
 ${projectData.soft_skills?.length > 0 ? `Soft Skills: ${projectData.soft_skills.join(', ')}` : ''}
+
+TEAM COMPOSITION
+==============
 ${memberDetails}
 
-For each candidate, provide:
-1. A realistic full name
-2. A detailed recruiting strategy explaining why they'd be perfect for this project (including skills, experience, background)
+AVAILABLE CANDIDATES
+==============
+${availableCandidatesList}
+
+INSTRUCTIONS
+==============
+Based on the project details, current team composition, and available candidates, recommend 3 candidates from the "AVAILABLE CANDIDATES" section that would be the best fit for this project.
+
+For each recommended candidate, provide:
+1. Their full name (exactly as listed in AVAILABLE CANDIDATES)
+2. A detailed recruiting strategy explaining why they'd be perfect for this project (including how their skills match project requirements and complement the current team)
 
 Format your response as a JSON array with the following structure:
 [
@@ -94,7 +129,7 @@ Format your response as a JSON array with the following structure:
   ...
 ]
 
-Make each candidate unique with different backgrounds, skills, and attributes. The recruiting strategy should be 3-4 sentences.`;
+The recruiting strategy should be 3-4 sentences and should focus on why they are specifically a good fit for THIS project and team.`;
 };
 
 /**
