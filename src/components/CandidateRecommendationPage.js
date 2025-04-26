@@ -27,7 +27,20 @@ const ListDisplay = ({ items, title }) => {
   );
 };
 
-const CandidateRecommendationPage = ({ teamData, candidates, onHire }) => {
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className="loading-spinner">
+    <div className="spinner"></div>
+    <p>AI is analyzing your project to find the perfect team members...</p>
+  </div>
+);
+
+const CandidateRecommendationPage = ({ 
+  teamData, 
+  candidates, 
+  onHire, 
+  isLoading = false 
+}) => {
   const nextMemberNumber = teamData.members.length + 1;
   const [showDetails, setShowDetails] = useState(false);
   
@@ -91,15 +104,23 @@ const CandidateRecommendationPage = ({ teamData, candidates, onHire }) => {
       
       <h3>Recommended for Member {nextMemberNumber}</h3>
       
-      <div className="candidates-container">
-        {candidates.map((candidate, index) => (
-          <CandidateCard 
-            key={index}
-            candidate={candidate}
-            onHire={onHire}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <div className="candidates-container">
+          {candidates && candidates.length > 0 ? (
+            candidates.map((candidate, index) => (
+              <CandidateCard 
+                key={index}
+                candidate={candidate}
+                onHire={onHire}
+              />
+            ))
+          ) : (
+            <p>No candidates available. Please try again.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

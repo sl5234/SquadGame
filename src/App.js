@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import TeamCreationPage from './components/TeamCreationPage';
 import CandidateRecommendationPage from './components/CandidateRecommendationPage';
 import MemberAddedPage from './components/MemberAddedPage';
 import TeamCompletePage from './components/TeamCompletePage';
-import candidatesData from './data/candidates.json';
+import getRecommendedMembers from './services/aiService';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -21,13 +21,30 @@ function App() {
     soft_skills: [],
     members: []
   });
+  const [candidates, setCandidates] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Get a random selection of candidates from the JSON data
-  const getCandidateRecommendations = () => {
-    // Shuffle the candidates array and take the first 3
-    const shuffled = [...candidatesData].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 3);
+  // Get AI-recommended candidates
+  const getCandidateRecommendations = async () => {
+    setIsLoading(true);
+    try {
+      const recommendations = await getRecommendedMembers(teamData, teamData.members);
+      setCandidates(recommendations);
+      return recommendations;
+    } catch (error) {
+      console.error("Error getting recommendations:", error);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  // Fetch candidates when the recommendation page loads
+  useEffect(() => {
+    if (currentPage === 'candidateRecommendation') {
+      getCandidateRecommendations();
+    }
+  }, [currentPage]);
 
   const handleStartTeam = () => {
     setCurrentPage('teamCreation');
@@ -72,8 +89,9 @@ function App() {
         return (
           <CandidateRecommendationPage 
             teamData={teamData}
-            candidates={getCandidateRecommendations()}
+            candidates={candidates}
             onHire={handleHireCandidate}
+            isLoading={isLoading}
           />
         );
       case 'memberAdded':

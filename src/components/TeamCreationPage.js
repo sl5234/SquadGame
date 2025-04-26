@@ -19,6 +19,9 @@ const TeamCreationPage = ({ onCreateTeam }) => {
       return;
     }
     
+    // Show alert when recommending first member
+    alert("Looking for the perfect first team member for your project!");
+    
     // Parse comma-separated values into arrays
     const requiredRolesArray = requiredRoles.split(',').map(role => role.trim()).filter(Boolean);
     const hardSkillsArray = hardSkills.split(',').map(skill => skill.trim()).filter(Boolean);

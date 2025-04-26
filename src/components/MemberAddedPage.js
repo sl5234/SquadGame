@@ -21,6 +21,12 @@ const MemberAddedPage = ({ teamData, onRecommendNext }) => {
   const nextMemberNumber = teamData.members.length + 1;
   const [showDetails, setShowDetails] = useState(false);
   
+  // Handle recommendation button click with alert
+  const handleRecommendClick = () => {
+    alert(`Finding the perfect ${nextMemberNumber}${nextMemberNumber === 2 ? 'nd' : 'rd'} team member for your project!`);
+    onRecommendNext();
+  };
+  
   return (
     <div className="member-added-page">
       <h1>{lastAddedMember.name} is now on your team!</h1>
@@ -78,7 +84,7 @@ const MemberAddedPage = ({ teamData, onRecommendNext }) => {
         ))}
       </div>
       
-      <button onClick={onRecommendNext} className="recommend-button">
+      <button onClick={handleRecommendClick} className="recommend-button">
         Recommend {nextMemberNumber}{nextMemberNumber === 2 ? 'nd' : 'rd'} member
       </button>
     </div>
