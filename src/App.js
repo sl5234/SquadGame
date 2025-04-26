@@ -5,6 +5,7 @@ import CandidateRecommendationPage from './components/CandidateRecommendationPag
 import MemberAddedPage from './components/MemberAddedPage';
 import TeamCompletePage from './components/TeamCompletePage';
 import getRecommendedMembers from './services/aiService';
+import EnvTest from './EnvTest'; // Import the test component
 
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -24,18 +25,42 @@ function App() {
   const [candidates, setCandidates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Log environment variables on app start
+  useEffect(() => {
+    console.log('App started - Environment Variable Check:');
+    console.log('REACT_APP_OPENAI_API_KEY exists:', !!process.env.REACT_APP_OPENAI_API_KEY);
+    
+    // If using webpack 5, this might explain why it's not working
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Running in development mode. If using webpack 5, ensure dotenv is properly configured.');
+    }
+  }, []);
+
   // Get AI-recommended candidates
   const getCandidateRecommendations = async () => {
+    console.log('🔍 Getting candidate recommendations for:', teamData.project_name || 'project');
     setIsLoading(true);
     try {
+      console.log('⏳ Starting recommendation request...');
       const recommendations = await getRecommendedMembers(teamData, teamData.members);
+      console.log('✅ Received recommendations:', recommendations.length);
+      
+      // Log recommended candidates in detail
+      console.log('🔍 === RECOMMENDED CANDIDATES ===');
+      recommendations.forEach((candidate, index) => {
+        console.log(`Candidate ${index + 1}: ${candidate.name}`);
+        console.log(`  - ID: ${candidate.id || 'No ID'}`);
+        console.log(`  - Strategy: ${candidate.recruitingStrategy.substring(0, 50)}...`);
+      });
+      
       setCandidates(recommendations);
       return recommendations;
     } catch (error) {
-      console.error("Error getting recommendations:", error);
+      console.error("❌ Error getting recommendations:", error);
       return [];
     } finally {
       setIsLoading(false);
+      console.log('🏁 Recommendation process completed');
     }
   };
 
@@ -62,13 +87,18 @@ function App() {
   };
 
   const handleHireCandidate = (candidate) => {
+    console.log('👍 Hiring candidate:', candidate.name, candidate.id || 'No ID');
+    
     const updatedMembers = [...teamData.members, candidate];
     setTeamData({
       ...teamData,
       members: updatedMembers
     });
     
+    console.log('👥 Updated team:', updatedMembers.map(m => m.name));
+    
     if (updatedMembers.length >= 3) {
+      console.log('🎉 Team complete with', updatedMembers.length, 'members!');
       setCurrentPage('teamComplete');
     } else {
       setCurrentPage('memberAdded');
@@ -110,6 +140,8 @@ function App() {
 
   return (
     <div className="container">
+      {/* Environment Variable Test - Remove after debugging */}
+      <EnvTest />
       {renderPage()}
     </div>
   );

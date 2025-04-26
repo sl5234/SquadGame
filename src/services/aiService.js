@@ -13,12 +13,6 @@ export const getRecommendedMembers = async (projectData, currentMembers = []) =>
     // Show an alert when getting recommendations
     alert("AI is analyzing your project to find the perfect team members!");
     
-    // If running in development mode and no API key is set, return mock data
-    if (process.env.NODE_ENV === 'development' && config.openai.apiKey === 'your-openai-api-key') {
-      console.log('Using mock data for OpenAI (API key not set)');
-      return getMockRecommendations(projectData, currentMembers);
-    }
-
     // Get system prompt from our prompt file
     const systemPrompt = getMemberRecommendationPrompt();
     
@@ -39,7 +33,33 @@ export const getRecommendedMembers = async (projectData, currentMembers = []) =>
         }
       ]
     };
-
+    
+    // Log the OpenAI request details
+    console.log('📤 Making OpenAI API request with hardcoded key');
+    console.log('Model:', config.openai.model);
+    
+    // Log the full prompts
+    console.log('\n📝 === SYSTEM PROMPT ===\n', systemPrompt);
+    console.log('\n📝 === USER PROMPT ===\n', userPrompt);
+    
+    // Log candidate data details
+    console.log('\n👥 === CANDIDATE DATA STATS ===');
+    console.log('Total candidates in dataset:', candidatesData.length);
+    console.log('Current team members:', currentMembers.map(m => m.name));
+    
+    const availableCandidateCount = candidatesData.filter(candidate => {
+      if (candidate.id && currentMembers.some(member => member.id && member.id === candidate.id)) {
+        return false;
+      }
+      return !currentMembers.some(member => member.name === candidate.name);
+    }).length;
+    
+    console.log('Available candidates (not in team):', availableCandidateCount);
+    
+    // Standard logs - we'll keep these for compatibility
+    console.log('System prompt length:', systemPrompt.length);
+    console.log('User prompt length:', userPrompt.length);
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -51,19 +71,50 @@ export const getRecommendedMembers = async (projectData, currentMembers = []) =>
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('❌ OpenAI API Error:', errorData);
       throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
-    const candidatesData = JSON.parse(data.choices[0].message.content);
     
-    return candidatesData.map(candidate => ({
-      name: candidate.name,
-      recruitingStrategy: candidate.recruiting_strategy
-    }));
+    // Log the successful response
+    console.log('📥 Received OpenAI API response:');
+    console.log('Response status:', response.status);
+    console.log('Model used:', data.model);
+    console.log('Completion tokens:', data.usage?.completion_tokens);
+    console.log('Prompt tokens:', data.usage?.prompt_tokens);
+    console.log('Total tokens:', data.usage?.total_tokens);
+    
+    // Check if we have the expected data structure
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      console.error('❌ Unexpected API response structure:', data);
+      console.log('🔄 Falling back to mock recommendations');
+      return getMockRecommendations(projectData, currentMembers);
+    }
+    
+    console.log('📄 Response content (full):', data.choices[0].message.content);
+    
+    try {
+      // First try a direct parse
+      console.log('🧠 Raw response content:', data.choices[0].message.content);
+      
+      // Use our safe extract function to handle different response formats
+      const recommendedCandidates = safeExtractCandidates(data.choices[0].message.content);
+      console.log('✅ Extracted candidates:', recommendedCandidates);
+      
+      return recommendedCandidates.map(candidate => ({
+        name: candidate.name,
+        recruitingStrategy: candidate.recruiting_strategy
+      }));
+    } catch (processError) {
+      console.error('❌ Error processing candidates:', processError);
+      console.log('🔄 Falling back to mock recommendations');
+      return getMockRecommendations(projectData, currentMembers);
+    }
   } catch (error) {
-    console.error('Error getting AI recommendations:', error);
+    console.error('❌ Error getting AI recommendations:', error);
     // Fallback to mock data if API call fails
+    console.log('🔄 Falling back to mock recommendations');
     return getMockRecommendations(projectData, currentMembers);
   }
 };
@@ -83,9 +134,25 @@ const generatePrompt = (projectData, currentMembers, availableCandidates) => {
       ).join('\n\n')}` 
     : '\nCurrent team members: None';
 
+  // Filter available candidates (those not already on the team)
+  const filteredCandidates = availableCandidates.filter(candidate => {
+    // If candidates have IDs, filter by ID
+    if (candidate.id && currentMembers.some(member => member.id && member.id === candidate.id)) {
+      return false;
+    }
+    // Otherwise filter by name
+    return !currentMembers.some(member => member.name === candidate.name);
+  });
+  
+  // Log detailed candidate information
+  console.log('\n🧮 === CANDIDATES INCLUDED IN PROMPT ===');
+  console.log('Available for selection:', filteredCandidates.length, 'candidates');
+  filteredCandidates.forEach((candidate, index) => {
+    console.log(`${index + 1}. ${candidate.name} (${candidate.id || 'No ID'})`);
+  });
+  
   // Format available candidates for the prompt
-  const availableCandidatesList = availableCandidates
-    .filter(candidate => !currentMembers.some(member => member.name === candidate.name))
+  const availableCandidatesList = filteredCandidates
     .map((candidate, index) => 
       `Candidate ${index+1}: ${candidate.name}
 Background: ${candidate.recruitingStrategy}`
@@ -120,7 +187,7 @@ For each recommended candidate, provide:
 1. Their full name (exactly as listed in AVAILABLE CANDIDATES)
 2. A detailed recruiting strategy explaining why they'd be perfect for this project (including how their skills match project requirements and complement the current team)
 
-Format your response as a JSON array with the following structure:
+VERY IMPORTANT: Your response must be ONLY a valid JSON array with the following structure. Do not include any text before or after the JSON:
 [
   {
     "name": "Candidate Name",
@@ -136,15 +203,105 @@ The recruiting strategy should be 3-4 sentences and should focus on why they are
  * Provides mock recommendations when OpenAI is not available
  */
 const getMockRecommendations = (projectData, currentMembers) => {
-  // Filter out current members from the pool
-  const currentMemberNames = currentMembers.map(member => member.name);
-  const availableCandidates = candidatesData.filter(candidate => 
-    !currentMemberNames.includes(candidate.name)
-  );
+  console.log('🔧 Using mock recommendations instead of OpenAI');
+  
+  // Filter out current members from the pool using IDs when available, fallback to names
+  const availableCandidates = candidatesData.filter(candidate => {
+    // If candidate has ID and there's a team member with matching ID, exclude
+    if (candidate.id && currentMembers.some(member => member.id && member.id === candidate.id)) {
+      return false;
+    }
+    // If no ID or no ID match, check by name
+    return !currentMembers.some(member => member.name === candidate.name);
+  });
+  
+  console.log('👥 Current team members:', currentMembers.map(m => m.name));
+  console.log('🧩 Available candidates pool size:', availableCandidates.length);
   
   // Shuffle and take 3 random candidates
   const shuffled = [...availableCandidates].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, 3);
+  const recommendations = shuffled.slice(0, 3);
+  
+  console.log('👥 Selected mock candidates:', recommendations.map(c => c.name));
+  
+  return recommendations;
+};
+
+// Helper function to safely extract candidate data
+const safeExtractCandidates = (responseData) => {
+  // If we have a string response (from API)
+  if (typeof responseData === 'string') {
+    try {
+      // Try to parse as JSON first
+      const parsed = JSON.parse(responseData);
+      if (Array.isArray(parsed)) {
+        // Ensure all candidates have IDs
+        return parsed.map((candidate, index) => ({
+          ...candidate,
+          id: candidate.id || `ai-candidate-${Date.now()}-${index}`
+        }));
+      } else if (parsed && parsed.candidates && Array.isArray(parsed.candidates)) {
+        // Ensure all candidates have IDs
+        return parsed.candidates.map((candidate, index) => ({
+          ...candidate,
+          id: candidate.id || `ai-candidate-${Date.now()}-${index}`
+        }));
+      }
+    } catch (e) {
+      // If parsing fails, try to extract JSON array from text
+      const jsonMatch = responseData.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        try {
+          const extracted = JSON.parse(jsonMatch[0]);
+          if (Array.isArray(extracted)) {
+            // Ensure all candidates have IDs
+            return extracted.map((candidate, index) => ({
+              ...candidate,
+              id: candidate.id || `ai-candidate-${Date.now()}-${index}`
+            }));
+          }
+        } catch (innerE) {
+          // Extraction failed
+        }
+      }
+    }
+  } 
+  // If we already have an array
+  else if (Array.isArray(responseData)) {
+    // Ensure all candidates have IDs
+    return responseData.map((candidate, index) => ({
+      ...candidate,
+      id: candidate.id || `ai-candidate-${Date.now()}-${index}`
+    }));
+  }
+  // If we have an object with a candidates array
+  else if (responseData && responseData.candidates && Array.isArray(responseData.candidates)) {
+    // Ensure all candidates have IDs
+    return responseData.candidates.map((candidate, index) => ({
+      ...candidate,
+      id: candidate.id || `ai-candidate-${Date.now()}-${index}`
+    }));
+  }
+  
+  // If all extraction attempts fail, create mock data
+  console.warn('⚠️ Could not extract valid candidates, creating fallback data');
+  return [
+    { 
+      id: "fallback-1",
+      name: "Alex Johnson",
+      recruiting_strategy: "This candidate would be an excellent fit based on their project requirements."
+    },
+    {
+      id: "fallback-2",
+      name: "Jordan Lee",
+      recruiting_strategy: "Their background in full-stack development aligns with the project goals."
+    },
+    {
+      id: "fallback-3",
+      name: "Taylor Williams",
+      recruiting_strategy: "Their UX/UI skills would complement the existing team well."
+    }
+  ];
 };
 
 export default getRecommendedMembers; 
