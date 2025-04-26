@@ -11,6 +11,14 @@ function App() {
   const [teamData, setTeamData] = useState({
     teamName: '',
     projectDescription: '',
+    project_name: '',
+    idea_name: '',
+    description: '',
+    goal: '',
+    product_type: '',
+    required_roles: [],
+    hard_skills_experience: [],
+    soft_skills: [],
     members: []
   });
   
@@ -25,11 +33,13 @@ function App() {
     setCurrentPage('teamCreation');
   };
 
-  const handleCreateTeam = (name, description) => {
+  const handleCreateTeam = (projectData) => {
     setTeamData({
       ...teamData,
-      teamName: name,
-      projectDescription: description
+      teamName: projectData.project_name, // For backward compatibility
+      projectDescription: projectData.description, // For backward compatibility
+      ...projectData,
+      members: []
     });
     setCurrentPage('candidateRecommendation');
   };

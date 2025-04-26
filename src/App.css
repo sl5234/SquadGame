@@ -124,3 +124,60 @@ h3 {
     padding: 1rem;
   }
 }
+
+/* Project details styling */
+.project-details {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f0f4f8;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.detail-toggle {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.detail-toggle:hover {
+  background-color: #d0d0d0;
+}
+
+.list-display {
+  margin: 1rem 0;
+}
+
+.list-display ul {
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.list-display li {
+  margin-bottom: 0.3rem;
+}
+
+.recommend-button {
+  margin-top: 1.5rem;
+}
+
+/* Form styling for the expanded team creation form */
+.form-group textarea {
+  min-height: 80px;
+}
+
+.form-group textarea#projectDescription {
+  min-height: 150px;
+}
+
+/* Required fields marker */
+.form-group label[for="teamName"]::after,
+.form-group label[for="projectDescription"]::after {
+  content: " *";
+  color: #e74c3c;
+}

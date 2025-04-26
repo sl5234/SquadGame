@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const CandidateCard = ({ candidate, onHire }) => {
   return (
@@ -11,16 +11,71 @@ const CandidateCard = ({ candidate, onHire }) => {
   );
 };
 
+// Helper component to display arrays like skills and roles
+const ListDisplay = ({ items, title }) => {
+  if (!items || items.length === 0) return null;
+  
+  return (
+    <div className="list-display">
+      <strong>{title}: </strong>
+      <ul>
+        {items.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const CandidateRecommendationPage = ({ teamData, candidates, onHire }) => {
   const nextMemberNumber = teamData.members.length + 1;
+  const [showDetails, setShowDetails] = useState(false);
   
   return (
     <div className="candidate-recommendation-page">
       <h1>Recommended Candidates</h1>
       
       <div className="team-info">
-        <h2>{teamData.teamName}</h2>
-        <p>{teamData.projectDescription}</p>
+        <h2>{teamData.project_name || teamData.teamName}</h2>
+        {teamData.idea_name && teamData.idea_name !== teamData.project_name && (
+          <h3>Idea: {teamData.idea_name}</h3>
+        )}
+        
+        <p>{teamData.description || teamData.projectDescription}</p>
+        
+        <button 
+          onClick={() => setShowDetails(!showDetails)} 
+          className="detail-toggle"
+        >
+          {showDetails ? 'Hide Details' : 'Show More Details'}
+        </button>
+        
+        {showDetails && (
+          <div className="project-details">
+            {teamData.goal && (
+              <p><strong>Goal:</strong> {teamData.goal}</p>
+            )}
+            
+            {teamData.product_type && (
+              <p><strong>Product Type:</strong> {teamData.product_type}</p>
+            )}
+            
+            <ListDisplay 
+              items={teamData.required_roles} 
+              title="Required Roles" 
+            />
+            
+            <ListDisplay 
+              items={teamData.hard_skills_experience} 
+              title="Hard Skills & Experience" 
+            />
+            
+            <ListDisplay 
+              items={teamData.soft_skills} 
+              title="Soft Skills" 
+            />
+          </div>
+        )}
       </div>
       
       {teamData.members.length > 0 && (
