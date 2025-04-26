@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Alex Johnson",
+    "recruitingStrategy": "Alex is a seasoned front-end developer with 5 years of experience in React. She has led multiple projects and is known for her attention to detail and clean code."
+  },
+  {
+    "name": "Taylor Williams",
+    "recruitingStrategy": "Taylor is a UX/UI specialist who has worked with startups and enterprise clients. They excel at creating intuitive interfaces and have strong collaboration skills."
+  },
+  {
+    "name": "Jordan Lee",
+    "recruitingStrategy": "Jordan is a full-stack developer with expertise in Node.js and React. He brings 7 years of experience and has a passion for scalable architecture and performance optimization."
+  },
+  {
+    "name": "Sam Martinez",
+    "recruitingStrategy": "Sam is a backend developer with extensive experience in cloud architecture. They specialize in building scalable systems and have worked with multiple Fortune 500 companies."
+  },
+  {
+    "name": "Casey Robinson",
+    "recruitingStrategy": "Casey is a DevOps engineer with 6 years of experience in CI/CD pipelines and containerization. They have successfully led infrastructure migrations for several startups."
+  },
+  {
+    "name": "Morgan Chen",
+    "recruitingStrategy": "Morgan is a product manager with a background in design. They bring a user-centered approach to projects and have a track record of successful product launches."
+  },
+  {
+    "name": "Riley Jackson",
+    "recruitingStrategy": "Riley is a data scientist with a strong mathematics background. They specialize in machine learning algorithms and have developed predictive models for various industries."
+  },
+  {
+    "name": "Jamie Garcia",
+    "recruitingStrategy": "Jamie is a security engineer focused on application security. They have helped multiple organizations implement robust security protocols and penetration testing."
+  },
+  {
+    "name": "Quinn Foster",
+    "recruitingStrategy": "Quinn is a mobile developer with expertise in React Native and iOS/Android development. They have built several successful cross-platform applications."
+  }
+] 

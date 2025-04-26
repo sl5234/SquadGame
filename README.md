@@ -1,6 +1,84 @@
 # SquadGame
 Changbal hackathon
 
+# Dream Team Builder
+
+Dream Team Builder is a simple, interactive web application that helps users create their dream project team. Users can enter their project details, get AI-recommended candidates, review candidate information, hire members, and build their full team.
+
+## Features
+
+- User-friendly interface for creating a dream project team
+- Step-by-step team building process
+- Candidate recommendation system
+- Mobile-friendly design
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js and npm installed
+- AWS CLI configured (for S3 deployment only)
+
+### Installation
+
+1. Clone this repository:
+```
+git clone <repository-url>
+cd dream-team-builder
+```
+
+2. Install dependencies:
+```
+npm install
+```
+
+3. Start the development server:
+```
+npm start
+```
+
+This will open the application in your browser at [http://localhost:3000](http://localhost:3000).
+
+## Deployment to S3
+
+This application is designed to be hosted on AWS S3. A deployment script is provided to simplify the process.
+
+1. Make sure you have the AWS CLI installed and configured with appropriate credentials.
+
+2. Run the deployment script:
+```
+./deploy-to-s3.sh
+```
+
+3. Follow the prompts to specify your S3 bucket name.
+
+4. Once deployed, the script will provide the public URL to access your application.
+
+## S3 URL Access
+
+The application can be accessed using the following URL patterns:
+- Direct S3 object URL: `https://<bucket-name>.s3.amazonaws.com/index.html`
+- S3 website URL: `http://<bucket-name>.s3-website-<region>.amazonaws.com`
+
+## Application Flow
+
+1. **Landing Page**: Users start by clicking "Start my dream team"
+2. **Team Creation Page**: Enter team name and project description
+3. **Candidate Recommendation**: Review and select from recommended candidates
+4. **Team Building**: Continue adding members until the team is complete
+5. **Completion**: View the assembled dream team
+
+## Development
+
+- Built with React.js
+- CSS for styling
+- No backend required (all data handled in front-end state)
+
+## License
+
+This project is released under the MIT License.
+>>>>>>> 044158a (Initial commit)
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -71,4 +149,3 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
->>>>>>> 5b67a18 (Initialize project using Create React App)

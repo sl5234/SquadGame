@@ -1,23 +1,88 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import LandingPage from './components/LandingPage';
+import TeamCreationPage from './components/TeamCreationPage';
+import CandidateRecommendationPage from './components/CandidateRecommendationPage';
+import MemberAddedPage from './components/MemberAddedPage';
+import TeamCompletePage from './components/TeamCompletePage';
+import candidatesData from './data/candidates.json';
 
 function App() {
+  const [currentPage, setCurrentPage] = useState('landing');
+  const [teamData, setTeamData] = useState({
+    teamName: '',
+    projectDescription: '',
+    members: []
+  });
+  
+  // Get a random selection of candidates from the JSON data
+  const getCandidateRecommendations = () => {
+    // Shuffle the candidates array and take the first 3
+    const shuffled = [...candidatesData].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  };
+
+  const handleStartTeam = () => {
+    setCurrentPage('teamCreation');
+  };
+
+  const handleCreateTeam = (name, description) => {
+    setTeamData({
+      ...teamData,
+      teamName: name,
+      projectDescription: description
+    });
+    setCurrentPage('candidateRecommendation');
+  };
+
+  const handleHireCandidate = (candidate) => {
+    const updatedMembers = [...teamData.members, candidate];
+    setTeamData({
+      ...teamData,
+      members: updatedMembers
+    });
+    
+    if (updatedMembers.length >= 3) {
+      setCurrentPage('teamComplete');
+    } else {
+      setCurrentPage('memberAdded');
+    }
+  };
+
+  const handleRecommendNext = () => {
+    setCurrentPage('candidateRecommendation');
+  };
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'landing':
+        return <LandingPage onStart={handleStartTeam} />;
+      case 'teamCreation':
+        return <TeamCreationPage onCreateTeam={handleCreateTeam} />;
+      case 'candidateRecommendation':
+        return (
+          <CandidateRecommendationPage 
+            teamData={teamData}
+            candidates={getCandidateRecommendations()}
+            onHire={handleHireCandidate}
+          />
+        );
+      case 'memberAdded':
+        return (
+          <MemberAddedPage 
+            teamData={teamData}
+            onRecommendNext={handleRecommendNext}
+          />
+        );
+      case 'teamComplete':
+        return <TeamCompletePage teamData={teamData} />;
+      default:
+        return <LandingPage onStart={handleStartTeam} />;
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      {renderPage()}
     </div>
   );
 }
